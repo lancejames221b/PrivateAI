@@ -4,7 +4,7 @@ A privacy protection plugin for AI-powered development tools that intercepts and
 
 ## 🔒 Features
 
-- **PII Detection**: Uses transformer models and pattern matching to detect sensitive information
+- **PII Detection**: Uses transformer models, Microsoft Presidio, and pattern matching to detect sensitive information
 - **Privacy Transformation**: Replaces sensitive information with innocuous placeholders
 - **Traffic Analysis**: Provides detailed metrics on what was protected
 - **Plugin Architecture**: Integrates with the Private AI plugin system
@@ -38,7 +38,7 @@ Private AI provides privacy protection by intercepting the traffic between your 
 ## 🛠️ How It Works
 
 1. **Intercepting Traffic**: Uses mitmproxy to intercept HTTPS traffic between your IDE and AI services
-2. **Detecting PII**: Uses transformer models and pattern matching to detect sensitive information
+2. **Detecting PII**: Uses Microsoft Presidio, transformer models, and pattern matching to detect sensitive information
 3. **Transforming PII**: Replaces sensitive information with innocuous placeholders
 4. **Preserving Functionality**: Ensures AI tools still work effectively with the transformed data
 5. **Analyzing Results**: Provides metrics on what was protected
@@ -156,6 +156,7 @@ Lance James, Unit 221B
 
 ## 🙏 Acknowledgments
 
+- [Microsoft Presidio](https://github.com/microsoft/presidio) for PII detection and anonymization
 - [mitmproxy](https://mitmproxy.org/) for the proxy functionality
 - [Hugging Face Transformers](https://huggingface.co/transformers/) for NER models
 - Various AI coding tools for enhancing developer productivity
