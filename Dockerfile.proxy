@@ -1,0 +1,46 @@
+# Use the official mitmproxy image as a parent image
+FROM mitmproxy/mitmproxy:latest
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Switch to root user to install dependencies
+USER root
+
+# Install build dependencies and curl for healthcheck
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3-dev \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch back to the non-root user provided by the base image
+USER mitmproxy
+
+# Copy the requirements files into the container at /app
+COPY requirements.txt /app/requirements.txt
+COPY requirements-privacy.txt /app/requirements-privacy.txt
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Install any needed packages specified in requirements-privacy.txt
+RUN pip install --no-cache-dir -r /app/requirements-privacy.txt
+
+# Copy the rest of the application code into the container at /app
+COPY . /app
+
+# Ensure data and logs directories exist and have correct permissions
+RUN mkdir -p /app/data /app/logs && \
+    chown -R mitmproxy:mitmproxy /app/data /app/logs && \
+    chmod -R 777 /app/data /app/logs # Ensure write permissions
+
+# Make port 8080 available to the world outside this container
+EXPOSE 8080
+
+# Define environment variable
+ENV NAME World
+
+# Run proxy_intercept.py when the container launches
+CMD ["mitmdump", "-s", "proxy_intercept.py", "--set", "block_global=false", "--listen-host", "0.0.0.0", "--listen-port", "8080", "--no-http2"] 

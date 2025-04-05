@@ -1,0 +1,237 @@
+{% extends "base_one_page.html" %}
+
+{% block title %}Private AI Proxy - One Page Interface{% endblock %}
+
+{% block content %}
+<div class="header text-center">
+    <h1>Private AI Proxy</h1>
+    <p class="lead">Protecting sensitive information in AI model interactions</p>
+</div>
+
+        <div class="row">
+            <!-- Proxy Status and Controls -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Proxy Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="proxy-status" class="text-center mb-3">
+                            <div class="alert alert-success">
+                                <span id="status-text">Proxy is running</span>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button id="toggle-proxy" class="btn btn-danger">Stop Proxy</button>
+                            <button id="test-proxy" class="btn btn-secondary">Test Connection</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Protection Overview -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">Protection Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-4 text-center">
+                                <div class="stat-value text-primary">128</div>
+                                <div>Replacements</div>
+                            </div>
+                            <div class="col-sm-4 text-center">
+                                <div class="stat-value text-danger">42</div>
+                                <div>Blocked Items</div>
+                            </div>
+                            <div class="col-sm-4 text-center">
+                                <div class="stat-value text-success">98%</div>
+                                <div>Protection Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Controls -->
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Privacy Controls</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="pii-protection" checked>
+                            <label class="form-check-label" for="pii-protection">PII Protection</label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="domain-protection" checked>
+                            <label class="form-check-label" for="domain-protection">Domain Protection</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="security-protection" checked>
+                            <label class="form-check-label" for="security-protection">Security Data</label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="api-protection" checked>
+                            <label class="form-check-label" for="api-protection">API Key Protection</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="inference-protection" checked>
+                            <label class="form-check-label" for="inference-protection">Inference Prevention</label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="code-protection" checked>
+                            <label class="form-check-label" for="code-protection">Code Protection</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid gap-2 col-6 mx-auto mt-3">
+                    <button id="save-settings" class="btn btn-primary">Save Settings</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Area -->
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">Test Your Text</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="input-text" class="form-label">Input Text</label>
+                        <textarea id="input-text" class="form-control" rows="5" placeholder="Enter text to test privacy filtering...">My email is john.doe@example.com and I work at Acme Corp. Our API key is sk_test_12345.</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="output-text" class="form-label">Filtered Result</label>
+                        <textarea id="output-text" class="form-control" rows="5" placeholder="Filtered output will appear here..." readonly>My email is [EMAIL_ADDRESS] and I work at [ORGANIZATION]. Our API key is [API_KEY].</textarea>
+                    </div>
+                </div>
+                <div class="d-grid gap-2 col-6 mx-auto mt-3">
+                    <button id="process-text" class="btn btn-success">Process Text</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Connection Settings -->
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="card-title mb-0">Connection Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="proxy-port" class="form-label">Proxy Port</label>
+                            <input type="number" class="form-control" id="proxy-port" value="8080">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="ai-endpoint" class="form-label">AI Model Endpoint</label>
+                            <input type="text" class="form-control" id="ai-endpoint" value="https://api.openai.com/v1/chat/completions">
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <button id="update-connection" class="btn btn-primary">Update Connection</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add this section to the main dashboard content -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-server"></i> AI Server Configurations
+                    </h5>
+                    <a href="{{ url_for('ai_servers') }}" class="btn btn-primary btn-sm">
+                        Manage Servers
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if ai_servers %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Provider</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for server in ai_servers %}
+                                    <tr>
+                                        <td>{{ server.name }}</td>
+                                        <td><span class="badge bg-info">{{ server.provider }}</span></td>
+                                        <td>
+                                            {% if server.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No AI servers configured yet. <a href="{{ url_for('add_ai_server') }}">Add your first server</a>.
+                    </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <small class="text-muted">
+                    Configure AI server endpoints to integrate with Private AI 🕵️. 
+                    Currently {{ ai_servers|length }} server(s) configured.
+                </small>
+            </div>
+        </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Simple demo functionality
+    document.getElementById('toggle-proxy').addEventListener('click', function() {
+        const statusText = document.getElementById('status-text');
+        const statusDiv = document.getElementById('proxy-status').querySelector('.alert');
+        const toggleBtn = document.getElementById('toggle-proxy');
+        
+        if (statusText.textContent === 'Proxy is running') {
+            statusText.textContent = 'Proxy is stopped';
+            statusDiv.classList.replace('alert-success', 'alert-danger');
+            toggleBtn.textContent = 'Start Proxy';
+            toggleBtn.classList.replace('btn-danger', 'btn-success');
+        } else {
+            statusText.textContent = 'Proxy is running';
+            statusDiv.classList.replace('alert-danger', 'alert-success');
+            toggleBtn.textContent = 'Stop Proxy';
+            toggleBtn.classList.replace('btn-success', 'btn-danger');
+        }
+    });
+
+    document.getElementById('process-text').addEventListener('click', function() {
+        const inputText = document.getElementById('input-text').value;
+        // This would normally call the API - using simple replacements for demo
+        let processedText = inputText
+            .replace(/[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL_ADDRESS]')
+            .replace(/sk_test_[a-zA-Z0-9]+/g, '[API_KEY]')
+            .replace(/Acme Corp/g, '[ORGANIZATION]');
+        
+        document.getElementById('output-text').value = processedText;
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}AI Server Configurations{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-4">AI Server Configurations</h1>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Managed AI Servers</h5>
+                <a href="{{ url_for('add_ai_server') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Add New Server
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if servers %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Provider</th>
+                                <th>Base URL</th>
+                                <th>Auth Type</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for server in servers %}
+                                <tr>
+                                    <td>{{ server.name }}</td>
+                                    <td><span class="badge bg-info">{{ server.provider }}</span></td>
+                                    <td>{{ server.base_url }}</td>
+                                    <td>{{ server.auth_type }}</td>
+                                    <td>
+                                        {% if server.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('edit_ai_server', server_name=server.name) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#deleteModal{{ loop.index }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Delete Confirmation Modal -->
+                                        <div class="modal fade" id="deleteModal{{ loop.index }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Confirm Deletion</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Are you sure you want to delete the server <strong>{{ server.name }}</strong>?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form action="{{ url_for('delete_ai_server', server_name=server.name) }}" method="post">
+                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No AI servers configured yet. <a href="{{ url_for('add_ai_server') }}">Add your first server</a>.
+                </div>
+            {% endif %}
+        </div>
+        <div class="card-footer">
+            <small class="text-muted">
+                Configure AI server endpoints to integrate with Private AI 🕵️. 
+                Each server configuration defines connection details for different AI providers.
+            </small>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">About AI Server Configuration</h5>
+        </div>
+        <div class="card-body">
+            <p>
+                The Private AI detective supports integration with multiple AI providers. Each server configuration allows you to:
+            </p>
+            <ul>
+                <li>Define connection details for AI API endpoints</li>
+                <li>Configure authentication methods</li>
+                <li>Specify custom headers for special requirements</li>
+                <li>Enable/disable specific providers as needed</li>
+            </ul>
+            <p>
+                <strong>Privacy Note:</strong> Authentication values (like API keys) are stored locally in your configuration file
+                and are never shared externally. The Private AI proxy will use these credentials to authenticate with AI services
+                while ensuring your data remains protected.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

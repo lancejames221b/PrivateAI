@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Add AI Server{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-4">Add New AI Server</h1>
+    
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Server Details</h5>
+                <a href="{{ url_for('ai_servers') }}" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Back to Servers
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('add_ai_server') }}">
+                {{ form.csrf_token }}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Server Name</label>
+                            {{ form.name(class="form-control", placeholder="Unique name for this server configuration") }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="provider" class="form-label">Provider Type</label>
+                            {{ form.provider(class="form-control") }}
+                            <small class="form-text text-muted">Select the AI provider type for format handling</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="base_url" class="form-label">API Base URL</label>
+                    {{ form.base_url(class="form-control", placeholder="https://api.example.com") }}
+                    {% if form.base_url.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.base_url.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <small class="form-text text-muted">The base URL for the AI API</small>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="auth_type" class="form-label">Authentication Type</label>
+                            {{ form.auth_type(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="auth_key" class="form-label">Auth Key/Header Name</label>
+                            {{ form.auth_key(class="form-control", placeholder="e.g., Authorization, x-api-key") }}
+                            <small class="form-text text-muted">Header name for authentication</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="auth_value" class="form-label">Auth Value/Token</label>
+                            {{ form.auth_value(class="form-control", placeholder="Your API key or token") }}
+                            <small class="form-text text-muted">For Bearer tokens, omit the 'Bearer ' prefix</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="custom_headers" class="form-label">Custom Headers (Optional)</label>
+                    {{ form.custom_headers(class="form-control", rows="3", placeholder='{"header-name": "value", "another-header": "value2"}') }}
+                    <small class="form-text text-muted">Additional headers in JSON format</small>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    {{ form.is_active(class="form-check-input") }}
+                    <label class="form-check-label" for="is_active">Active</label>
+                    <small class="form-text text-muted d-block">Deactivate to temporarily disable this server</small>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('ai_servers') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+        <div class="card-footer">
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle"></i> <strong>Private AI Detective Tip:</strong> 
+                Configure each AI provider you want to use. Your authentication details are stored securely
+                and used only to connect to the AI services through the privacy-preserving proxy.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show/hide relevant fields based on authentication type
+    document.addEventListener('DOMContentLoaded', function() {
+        const authTypeSelect = document.getElementById('auth_type');
+        const authKeyField = document.getElementById('auth_key');
+        const authValueField = document.getElementById('auth_value');
+        
+        function updateAuthFields() {
+            const selectedValue = authTypeSelect.value;
+            
+            if (selectedValue === 'none') {
+                authKeyField.parentElement.style.display = 'none';
+                authValueField.parentElement.style.display = 'none';
+            } else {
+                authKeyField.parentElement.style.display = 'block';
+                authValueField.parentElement.style.display = 'block';
+                
+                // Update labels based on auth type
+                if (selectedValue === 'api_key') {
+                    authKeyField.labels[0].textContent = 'Header Name';
+                    authValueField.labels[0].textContent = 'API Key';
+                } else if (selectedValue === 'bearer') {
+                    authKeyField.labels[0].textContent = 'Header Name';
+                    authValueField.labels[0].textContent = 'Token (without Bearer prefix)';
+                } else if (selectedValue === 'basic') {
+                    authKeyField.labels[0].textContent = 'Username';
+                    authValueField.labels[0].textContent = 'Password';
+                }
+            }
+        }
+        
+        // Initial update
+        updateAuthFields();
+        
+        // Update when selection changes
+        authTypeSelect.addEventListener('change', updateAuthFields);
+    });
+</script>
+{% endblock %} 

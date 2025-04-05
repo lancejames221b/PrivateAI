@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "7070:7070"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - .:/app
+    environment:
+      - FLASK_ENV=development
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - proxy
+    networks:
+      - app-network
+
+  proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.proxy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PROXY_PORT=8080
+      - LOG_LEVEL=debug
+      - LOG_FILE=/app/logs/proxy.log
+      - USE_PRESIDIO=true
+      - ENCRYPT_DATABASE=true
+    networks:
+      - app-network
+    # Ensure the proxy container stays running
+    restart: always
+    # Use a healthcheck to ensure the proxy is actually running
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080", "||", "exit", "1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  data-volume:
+  logs-volume:
+
+networks:
+  app-network:
+    driver: bridge 

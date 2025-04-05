@@ -1,0 +1,671 @@
+{% extends "base_one_page.html" %}
+
+{% block title %}Private AI Proxy - One Page Interface{% endblock %}
+
+{% block content %}
+        <div class="header text-center">
+    <h1>Private AI 🕵️</h1>
+    <p class="lead">Your AI Security Detective - Protecting sensitive information in AI model interactions</p>
+        </div>
+
+        <div class="row">
+            <!-- Proxy Status and Controls -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Proxy Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="proxy-status" class="text-center mb-3">
+                            <div class="alert {% if is_proxy_running() %}alert-success{% else %}alert-danger{% endif %}">
+                                <span id="status-text">{% if is_proxy_running() %}Proxy is running{% else %}Proxy is stopped{% endif %}</span>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <form id="proxy-control-form" method="post" action="{% if is_proxy_running() %}{{ url_for('stop_proxy') }}{% else %}{{ url_for('start_proxy') }}{% endif %}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" id="toggle-proxy" class="btn {% if is_proxy_running() %}btn-danger{% else %}btn-success{% endif %}">
+                                    {% if is_proxy_running() %}Stop Proxy{% else %}Start Proxy{% endif %}
+                                </button>
+                            </form>
+                            <button id="install-cert-modal-btn" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#installCertModal">Install Certificate</button>
+                            <button id="test-proxy" class="btn btn-secondary">Test Connection</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Protection Overview -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">Protection Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-4 text-center">
+                                <div class="stat-value text-primary" id="replacements-count">
+                                    {{ stats.replacements if stats and stats.replacements else 0 }}
+                                </div>
+                                <div>Replacements</div>
+                            </div>
+                            <div class="col-sm-4 text-center">
+                                <div class="stat-value text-danger" id="blocked-count">
+                                    {{ stats.blocked if stats and stats.blocked else 0 }}
+                                </div>
+                                <div>Blocked Items</div>
+                            </div>
+                            <div class="col-sm-4 text-center">
+                                <div class="stat-value text-success" id="protection-rate">
+                                    {{ stats.protection_rate if stats and stats.protection_rate else '0%' }}
+                                </div>
+                                <div>Protection Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Controls -->
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Privacy Controls</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="pii-protection" checked>
+                            <label class="form-check-label" for="pii-protection">PII Protection</label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="domain-protection" checked>
+                            <label class="form-check-label" for="domain-protection">Domain Protection</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="security-protection" checked>
+                            <label class="form-check-label" for="security-protection">Security Data</label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="api-protection" checked>
+                            <label class="form-check-label" for="api-protection">API Key Protection</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="inference-protection" checked>
+                            <label class="form-check-label" for="inference-protection">Inference Prevention</label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="code-protection" checked>
+                            <label class="form-check-label" for="code-protection">Code Protection</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid gap-2 col-6 mx-auto mt-3">
+                    <button id="save-settings" class="btn btn-primary">Save Settings</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Area -->
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">Test Your Text</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="input-text" class="form-label">Input Text</label>
+                        <textarea id="input-text" class="form-control" rows="5" placeholder="Enter text to test privacy filtering...">My email is john.doe@example.com and I work at Acme Corp. Our API key is sk_test_12345.</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="output-text" class="form-label">Filtered Result</label>
+                        <textarea id="output-text" class="form-control" rows="5" placeholder="Filtered output will appear here..." readonly>My email is [EMAIL_ADDRESS] and I work at [ORGANIZATION]. Our API key is [API_KEY].</textarea>
+                    </div>
+                </div>
+                <div class="d-grid gap-2 col-6 mx-auto mt-3">
+                    <button id="process-text" class="btn btn-success">Process Text</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain Management -->
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h5 class="card-title mb-0">Domain Management</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label for="domain-category" class="form-label">Provider Category</label>
+                            <select class="form-select" id="domain-category">
+                                <option value="openai">OpenAI</option>
+                                <option value="anthropic">Anthropic</option>
+                                <option value="google">Google</option>
+                                <option value="mistral">Mistral AI</option>
+                                <option value="ide">IDE Tools</option>
+                                <option value="azure">Azure</option>
+                                <option value="custom">Custom Provider</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label for="new-domain" class="form-label">Add Domain</label>
+                            <input type="text" class="form-control" id="new-domain" placeholder="api.example.com">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button id="add-domain" class="btn btn-success form-control">Add Domain</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Current Domains</label>
+                    <div class="domain-list p-2 border rounded">
+                        <div class="domain-item d-flex justify-content-between align-items-center p-1">
+                            <span>api.openai.com</span>
+                            <button class="btn btn-sm btn-danger remove-domain">Remove</button>
+                        </div>
+                        <div class="domain-item d-flex justify-content-between align-items-center p-1">
+                            <span>api.anthropic.com</span>
+                            <button class="btn btn-sm btn-danger remove-domain">Remove</button>
+                        </div>
+                        <div class="domain-item d-flex justify-content-between align-items-center p-1">
+                            <span>api.gemini.google.com</span>
+                            <button class="btn btn-sm btn-danger remove-domain">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <button id="save-domains" class="btn btn-primary">Save Domains</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Protocol Reference -->
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="card-title mb-0">AI Model API Protocols</h5>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="apiTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="openai-tab" data-bs-toggle="tab" data-bs-target="#openai" type="button" role="tab">OpenAI</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="anthropic-tab" data-bs-toggle="tab" data-bs-target="#anthropic" type="button" role="tab">Anthropic</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="google-tab" data-bs-toggle="tab" data-bs-target="#google" type="button" role="tab">Google</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="sse-tab" data-bs-toggle="tab" data-bs-target="#sse" type="button" role="tab">SSE Events</button>
+                    </li>
+                </ul>
+                <div class="tab-content p-3 border border-top-0 rounded-bottom" id="apiTabsContent">
+                    <!-- OpenAI API Format -->
+                    <div class="tab-pane fade show active" id="openai" role="tabpanel">
+                        <h6>OpenAI Chat Completions API</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "model": "gpt-4",
+  "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Hello, world!"}
+  ],
+  "temperature": 0.7,
+  "max_tokens": 150
+}</code></pre>
+                        <h6 class="mt-3">Response Format</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "id": "chatcmpl-123",
+  "object": "chat.completion",
+  "created": 1677858242,
+  "model": "gpt-4",
+  "choices": [{
+    "message": {
+      "role": "assistant",
+      "content": "Hello! How can I assist you today?"
+    },
+    "index": 0,
+    "finish_reason": "stop"
+  }]
+}</code></pre>
+                    </div>
+                    
+                    <!-- Anthropic API Format -->
+                    <div class="tab-pane fade" id="anthropic" role="tabpanel">
+                        <h6>Anthropic Claude API</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "model": "claude-3-opus-20240229",
+  "messages": [
+    {"role": "user", "content": "Hello, world!"}
+  ],
+  "max_tokens": 1024,
+  "temperature": 0.7
+}</code></pre>
+                        <h6 class="mt-3">Response Format</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "id": "msg_01XxXxXxXxXxXxXxXxXxXxXx",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "Hello! How can I assist you today?"
+    }
+  ],
+  "model": "claude-3-opus-20240229",
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 5,
+    "output_tokens": 9
+  }
+}</code></pre>
+                    </div>
+                    
+                    <!-- Google API Format -->
+                    <div class="tab-pane fade" id="google" role="tabpanel">
+                        <h6>Google Gemini API</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [
+        { "text": "Hello, world!" }
+      ]
+    }
+  ],
+  "generationConfig": {
+    "temperature": 0.7,
+    "maxOutputTokens": 1024
+  }
+}</code></pre>
+                        <h6 class="mt-3">Response Format</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "candidates": [
+    {
+      "content": {
+        "role": "model",
+        "parts": [
+          { "text": "Hello! How can I assist you today?" }
+        ]
+      },
+      "finishReason": "STOP"
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 5,
+    "candidatesTokenCount": 9,
+    "totalTokenCount": 14
+  }
+}</code></pre>
+    </div>
+
+                    <!-- SSE Events -->
+                    <div class="tab-pane fade" id="sse" role="tabpanel">
+                        <h6>Server-Sent Events (SSE) Format</h6>
+                        <p>SSE is used for streaming responses from AI models. Each event is prefixed with <code>data: </code> and events are separated by double newlines.</p>
+                        
+                        <h6 class="mt-3">OpenAI SSE Format</h6>
+                        <pre class="bg-light p-3 rounded"><code>data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677858242,"model":"gpt-4","choices":[{"delta":{"role":"assistant"},"index":0}]}
+
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677858242,"model":"gpt-4","choices":[{"delta":{"content":"Hello"},"index":0}]}
+
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677858242,"model":"gpt-4","choices":[{"delta":{"content":"!"},"index":0}]}
+
+data: [DONE]</code></pre>
+                        
+                        <h6 class="mt-3">Anthropic SSE Format</h6>
+                        <pre class="bg-light p-3 rounded"><code>data: {"type":"message_start","message":{"id":"msg_01XxXxXxXxXxXxXxXxXxXxXx","type":"message","role":"assistant","content":[],"model":"claude-3-opus-20240229"}}
+
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}
+
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"!"}}
+
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","usage":{"input_tokens":5,"output_tokens":2}}}
+
+data: {"type":"message_stop"}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Certificate Installation Modal -->
+        <div class="modal fade" id="installCertModal" tabindex="-1" aria-labelledby="installCertModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="installCertModalLabel">Install Private AI CA Certificate</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>To allow Private AI to inspect HTTPS traffic, you need to manually install its CA certificate into your system or browser trust store.</p>
+                        
+                        <div class="text-center mb-3">
+                            <a href="{{ url_for('download_cert') }}" class="btn btn-primary" download="mitmproxy-ca-cert.pem">
+                                <i class="bi bi-download me-1"></i> Download Certificate (mitmproxy-ca-cert.pem)
+                            </a>
+                        </div>
+
+                        <h6>Installation Instructions:</h6>
+                        <ul class="nav nav-tabs" id="certInstallTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="macos-tab" data-bs-toggle="tab" data-bs-target="#macos-instructions" type="button" role="tab" aria-controls="macos-instructions" aria-selected="true">macOS</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="windows-tab" data-bs-toggle="tab" data-bs-target="#windows-instructions" type="button" role="tab" aria-controls="windows-instructions" aria-selected="false">Windows</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="linux-tab" data-bs-toggle="tab" data-bs-target="#linux-instructions" type="button" role="tab" aria-controls="linux-instructions" aria-selected="false">Linux</button>
+                            </li>
+                             <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="firefox-tab" data-bs-toggle="tab" data-bs-target="#firefox-instructions" type="button" role="tab" aria-controls="firefox-instructions" aria-selected="false">Firefox</button>
+                            </li>
+                             <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="ios-tab" data-bs-toggle="tab" data-bs-target="#ios-instructions" type="button" role="tab" aria-controls="ios-instructions" aria-selected="false">iOS</button>
+                            </li>
+                             <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="android-tab" data-bs-toggle="tab" data-bs-target="#android-instructions" type="button" role="tab" aria-controls="android-instructions" aria-selected="false">Android</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-2" id="certInstallTabContent" style="max-height: 300px; overflow-y: auto;">
+                            <div class="tab-pane fade show active" id="macos-instructions" role="tabpanel" aria-labelledby="macos-tab">
+                                <ol>
+                                    <li>Download the certificate using the button above.</li>
+                                    <li>Open the <strong>Keychain Access</strong> application (Applications > Utilities > Keychain Access).</li>
+                                    <li>Select the <strong>System</strong> keychain from the top-left panel.</li>
+                                    <li>Drag the downloaded <code>mitmproxy-ca-cert.pem</code> file into the System keychain.</li>
+                                    <li>Double-click the "mitmproxy" certificate that appears.</li>
+                                    <li>Expand the "Trust" section.</li>
+                                    <li>Change "When using this certificate" to <strong>Always Trust</strong>.</li>
+                                    <li>Close the window (you may be prompted for your administrator password).</li>
+                                    <li>Restart your browser.</li>
+                                </ol>
+                            </div>
+                            <div class="tab-pane fade" id="windows-instructions" role="tabpanel" aria-labelledby="windows-tab">
+                                <ol>
+                                    <li>Download the certificate.</li>
+                                    <li>Double-click the downloaded <code>mitmproxy-ca-cert.pem</code> file.</li>
+                                    <li>Click "Install Certificate...".</li>
+                                    <li>Select Store Location: <strong>Local Machine</strong>. Click Next.</li>
+                                    <li>Select "Place all certificates in the following store". Click Browse.</li>
+                                    <li>Select <strong>Trusted Root Certification Authorities</strong>. Click OK.</li>
+                                    <li>Click Next, then Finish. Accept any security warnings.</li>
+                                    <li>Restart your browser.</li>
+                                </ol>
+                                 <p><em>Note: Some applications (like Python scripts using `requests`) might require setting the `REQUESTS_CA_BUNDLE` environment variable to point to the `.pem` file.</em></p>
+                            </div>
+                            <div class="tab-pane fade" id="linux-instructions" role="tabpanel" aria-labelledby="linux-tab">
+                                <p>Commands may vary depending on your distribution.</p>
+                                <strong>Debian/Ubuntu:</strong>
+                                <ol>
+                                    <li>Download the certificate.</li>
+                                    <li><code>sudo mkdir -p /usr/local/share/ca-certificates/extra</code></li>
+                                    <li><code>sudo cp mitmproxy-ca-cert.pem /usr/local/share/ca-certificates/extra/mitmproxy-ca.crt</code></li>
+                                    <li><code>sudo update-ca-certificates</code></li>
+                                </ol>
+                                <strong>Fedora/CentOS/RHEL:</strong>
+                                <ol>
+                                    <li>Download the certificate.</li>
+                                    <li><code>sudo cp mitmproxy-ca-cert.pem /etc/pki/ca-trust/source/anchors/mitmproxy-ca.crt</code></li>
+                                    <li><code>sudo update-ca-trust</code></li>
+                                </ol>
+                                 <p>Restart your browser after installation.</p>
+                            </div>
+                            <div class="tab-pane fade" id="firefox-instructions" role="tabpanel" aria-labelledby="firefox-tab">
+                                 <p>Firefox uses its own certificate store.</p>
+                                <ol>
+                                    <li>Download the certificate.</li>
+                                     <li>Open Firefox Settings/Preferences.</li>
+                                     <li>Search for "certificates" and click "View Certificates...".</li>
+                                     <li>Go to the "Authorities" tab.</li>
+                                     <li>Click "Import...".</li>
+                                     <li>Select the downloaded <code>mitmproxy-ca-cert.pem</code> file.</li>
+                                     <li>Check the box for "Trust this CA to identify websites".</li>
+                                     <li>Click OK.</li>
+                                </ol>
+                            </div>
+                             <div class="tab-pane fade" id="ios-instructions" role="tabpanel" aria-labelledby="ios-tab">
+                                <ol>
+                                    <li>Download the certificate (e.g., email it to yourself, host it locally).</li>
+                                     <li>Open the downloaded file on your iOS device.</li>
+                                     <li>You will be prompted to review the profile in Settings.</li>
+                                     <li>Go to Settings > General > VPN & Device Management (or Profiles & Device Management).</li>
+                                     <li>Tap on the downloaded "mitmproxy" profile.</li>
+                                     <li>Tap "Install" in the top right corner and follow the prompts.</li>
+                                     <li>After installation, go to Settings > General > About > Certificate Trust Settings.</li>
+                                     <li>Find the "mitmproxy" certificate and toggle it ON to enable full trust.</li>
+                                </ol>
+                            </div>
+                             <div class="tab-pane fade" id="android-instructions" role="tabpanel" aria-labelledby="android-tab">
+                                 <p>Steps may vary slightly depending on Android version and manufacturer.</p>
+                                <ol>
+                                    <li>Download the certificate.</li>
+                                     <li>Go to Settings > Security & privacy > More security settings (or Encryption & credentials).</li>
+                                     <li>Tap "Install a certificate" or "Install from storage".</li>
+                                     <li>Select "CA certificate". You might see a warning; tap "Install anyway".</li>
+                                     <li>Browse to and select the downloaded <code>mitmproxy-ca-cert.pem</code> file.</li>
+                                     <li>If prompted, name the certificate (e.g., "mitmproxy").</li>
+                                     <li>You might need to set or confirm a screen lock (PIN, pattern, password).</li>
+                                </ol>
+                                <p><em>Note: Installing user CA certificates might be restricted on newer Android versions for certain apps.</em></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Existing alerts container -->
+        <div id="proxy-status-alerts"></div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Proxy Status</h5>
+            </div>
+            <div class="card-body">
+                <div id="proxy-status" class="text-center mb-3">
+                    <div class="alert {% if is_proxy_running() %}alert-success{% else %}alert-danger{% endif %}">
+                        <span id="status-text">{% if is_proxy_running() %}Proxy is running{% else %}Proxy is stopped{% endif %}</span>
+                    </div>
+                </div>
+                <div class="d-grid gap-2">
+                    <form id="proxy-control-form" method="post" action="{% if is_proxy_running() %}{{ url_for('stop_proxy') }}{% else %}{{ url_for('start_proxy') }}{% endif %}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" id="toggle-proxy" class="btn {% if is_proxy_running() %}btn-danger{% else %}btn-success{% endif %}">
+                            {% if is_proxy_running() %}Stop Proxy{% else %}Start Proxy{% endif %}
+                        </button>
+                    </form>
+                    <button id="install-cert-modal-btn" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#installCertModal">Install Certificate</button>
+                    <button id="test-proxy" class="btn btn-secondary">Test Connection</button>
+                </div>
+            </div>
+        </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Simple demo functionality
+    // Proxy status is now handled by the server-side form submission
+    // The page will reload with updated status after form submission
+
+    // Test Connection button functionality
+    document.getElementById('test-proxy').addEventListener('click', function() {
+        const button = this;
+        const origText = button.textContent;
+        const proxyPort = 8080; // Default proxy port
+        // Disable button and show loading state
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Testing...';
+        
+        // Make an AJAX call to test the connection
+        fetch('/test_proxy_connection', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                proxy_port: proxyPort
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Re-enable button
+            button.disabled = false;
+            button.textContent = origText;
+            
+            // Create alert element
+            const alertDiv = document.createElement('div');
+            alertDiv.className = data.success ? 'alert alert-success' : 'alert alert-danger';
+            alertDiv.textContent = data.message;
+            alertDiv.style.marginTop = '10px';
+            
+            // Add close button
+            const closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.className = 'btn-close';
+            closeButton.setAttribute('data-bs-dismiss', 'alert');
+            alertDiv.appendChild(closeButton);
+            
+            // Find the container and insert the alert
+            const container = button.closest('.card-body');
+            
+            // Remove any existing alerts
+            const existingAlerts = container.querySelectorAll('.alert:not(#proxy-status .alert)');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Add the new alert
+            container.appendChild(alertDiv);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        })
+        .catch(error => {
+            // Re-enable button
+            button.disabled = false;
+            button.textContent = origText;
+            
+            // Show error
+            const container = button.closest('.card-body');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger';
+            alertDiv.textContent = 'Connection test failed: ' + error.message;
+            
+            // Remove any existing alerts
+            const existingAlerts = container.querySelectorAll('.alert:not(#proxy-status .alert)');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Add the new alert
+            container.appendChild(alertDiv);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        });
+        });
+
+        document.getElementById('process-text').addEventListener('click', function() {
+            const inputText = document.getElementById('input-text').value;
+        const button = this;
+        const origText = button.textContent;
+        
+        // Disable button and show loading state
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+        
+        // Call the API to process the text
+        fetch('/api/process-text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: inputText
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Re-enable button
+            button.disabled = false;
+            button.textContent = origText;
+            
+            if (data.error) {
+                alert('Error: ' + data.error);
+                return;
+            }
+            
+            // Update the output text
+            document.getElementById('output-text').value = data.processed_text;
+            
+            // Display entities found count
+            const entitiesCount = data.entities_found || 0;
+            const outputLabel = document.querySelector('label[for="output-text"]');
+            outputLabel.textContent = `Filtered Result (${entitiesCount} entities found)`;
+        })
+        .catch(error => {
+            // Re-enable button
+            button.disabled = false;
+            button.textContent = origText;
+            
+            // Show error
+            alert('Error processing text: ' + error.message);
+        });
+    });
+
+    // Domain Management functionality
+    document.getElementById('add-domain').addEventListener('click', function() {
+        const domainInput = document.getElementById('new-domain');
+        const domain = domainInput.value.trim();
+        
+        if (domain) {
+            const domainList = document.querySelector('.domain-list');
+            const newDomainItem = document.createElement('div');
+            newDomainItem.className = 'domain-item d-flex justify-content-between align-items-center p-1';
+            newDomainItem.innerHTML = `
+                <span>${domain}</span>
+                <button class="btn btn-sm btn-danger remove-domain">Remove</button>
+            `;
+            
+            domainList.appendChild(newDomainItem);
+            domainInput.value = '';
+            
+            // Add event listener to the new remove button
+            newDomainItem.querySelector('.remove-domain').addEventListener('click', function() {
+                newDomainItem.remove();
+            });
+        }
+    });
+    
+    // Add event listeners to existing remove buttons
+    document.querySelectorAll('.remove-domain').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.domain-item').remove();
+        });
+    });
+    
+    // Save domains button functionality
+    document.getElementById('save-domains').addEventListener('click', function() {
+        alert('Domains saved successfully!');
+        // In a real implementation, this would make an AJAX call to save the domains
+        });
+    </script>
+{% endblock %}

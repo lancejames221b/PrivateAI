@@ -1,0 +1,105 @@
+/* Custom styles for AI Security Proxy admin panel */
+
+/* Main branding colors */
+:root {
+    --primary: #1a73e8;
+    --secondary: #5f6368;
+    --success: #0f9d58;
+    --danger: #ea4335;
+    --warning: #f9ab00;
+    --info: #4285f4;
+    --dark: #202124;
+    --light: #f8f9fa;
+}
+
+/* Navbar styling */
+.navbar-brand {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand img {
+    margin-right: 10px;
+}
+
+/* Card enhancements */
+.card {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+    font-weight: 500;
+}
+
+/* Dashboard stats */
+.display-4 {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* Button styling */
+.btn {
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: #1669d8;
+    border-color: #1669d8;
+}
+
+/* Table enhancements */
+.table th {
+    font-weight: 600;
+    color: var(--secondary);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(26, 115, 232, 0.05);
+}
+
+/* Footer styling */
+footer {
+    margin-top: 3rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* Code blocks */
+code {
+    background-color: #f0f0f0;
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: #d63384;
+    font-size: 0.875em;
+}
+
+pre code {
+    background-color: #272822;
+    color: #f8f8f2;
+    display: block;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .navbar-brand img {
+        height: 30px;
+    }
+} 

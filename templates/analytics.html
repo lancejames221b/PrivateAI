@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics Panel - AI Security Proxy{% endblock %}
+
+{% block head %}
+<!-- Chart.js for visualizations -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Date Range Picker -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-chart-line"></i> Analytics Panel</h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">Analyze privacy effectiveness, usage statistics, and performance metrics.</p>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                            <input type="text" class="form-control" id="date-range" value="Last 7 Days">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="model-filter">
+                            <option value="all">All Models</option>
+                            <option value="openai">OpenAI</option>
+                            <option value="anthropic">Anthropic</option>
+                            <option value="google">Google AI</option>
+                            <option value="mistral">Mistral AI</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" id="update-analytics">
+                                <i class="fas fa-sync-alt"></i> Update Analytics
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <ul class="nav nav-tabs" id="analyticsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="privacy-tab" data-bs-toggle="tab" data-bs-target="#privacy" type="button" role="tab" aria-controls="privacy" aria-selected="true">
+                            <i class="fas fa-shield-alt"></i> Privacy Effectiveness
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="usage-tab" data-bs-toggle="tab" data-bs-target="#usage" type="button" role="tab" aria-controls="usage" aria-selected="false">
+                            <i class="fas fa-users"></i> Usage Statistics
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="performance-tab" data-bs-toggle="tab" data-bs-target="#performance" type="button" role="tab" aria-controls="performance" aria-selected="false">
+                            <i class="fas fa-tachometer-alt"></i> Performance Metrics
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content" id="analyticsTabsContent">
+    <!-- Privacy Effectiveness Tab -->
+    <div class="tab-pane fade show active" id="privacy" role="tabpanel" aria-labelledby="privacy-tab">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Privacy Transformation Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:300px;">
+                            <canvas id="privacyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-check-circle"></i> Privacy Score</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="display-1 mb-3">92<small>%</small></div>
+                        <p class="lead">Overall Privacy Effectiveness</p>
+                        
+                        <hr>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body text-center">
+                                        <h3>98<small>%</small></h3>
+                                        <p class="mb-0">PII Protection</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body text-center">
+                                        <h3>95<small>%</small></h3>
+                                        <p class="mb-0">Credential Protection</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body text-center">
+                                        <h3>88<small>%</small></h3>
+                                        <p class="mb-0">Code Protection</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body text-center">
+                                        <h3>90<small>%</small></h3>
+                                        <p class="mb-0">Domain Protection</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Usage Statistics Tab -->
+    <div class="tab-pane fade" id="usage" role="tabpanel" aria-labelledby="usage-tab">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-line"></i> Usage Trends</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:300px;">
+                            <canvas id="usageChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-users"></i> User Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6>Active Users</h6>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">75%</div>
+                            </div>
+                            <small class="text-muted">15 of 20 registered users active in last 7 days</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6>User Engagement</h6>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: 82%;" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100">82%</div>
+                            </div>
+                            <small class="text-muted">Based on session duration and interaction frequency</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6>New Users</h6>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+                            </div>
+                            <small class="text-muted">5 new users in last 30 days</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Performance Metrics Tab -->
+    <div class="tab-pane fade" id="performance" role="tabpanel" aria-labelledby="performance-tab">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-tachometer-alt"></i> Performance Trends</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:300px;">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-bolt"></i> Performance Score</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="display-1 mb-3">88<small>%</small></div>
+                        <p class="lead">Overall Performance Rating</p>
+                        
+                        <hr>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body text-center">
+                                        <h3>124<small>ms</small></h3>
+                                        <p class="mb-0">Avg. Latency</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body text-center">
+                                        <h3>99.8<small>%</small></h3>
+                                        <p class="mb-0">Uptime</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body text-center">
+                                        <h3>0.8<small>%</small></h3>
+                                        <p class="mb-0">Error Rate</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body text-center">
+                                        <h3>42<small>/min</small></h3>
+                                        <p class="mb-0">Throughput</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date range picker
+        $('#date-range').daterangepicker({
+            startDate: moment().subtract(7, 'days'),
+            endDate: moment(),
+            ranges: {
+               'Today': [moment(), moment()],
+               'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+               'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+               'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+               'This Month': [moment().startOf('month'), moment().endOf('month')],
+               'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        });
+        
+        // Privacy Chart
+        const privacyCtx = document.getElementById('privacyChart').getContext('2d');
+        const privacyChart = new Chart(privacyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Mar 28', 'Mar 29', 'Mar 30', 'Mar 31', 'Apr 1', 'Apr 2', 'Apr 3'],
+                datasets: [{
+                    label: 'Detected Entities',
+                    data: [245, 312, 287, 356, 298, 342, 378],
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Transformed Entities',
+                    data: [235, 302, 275, 342, 285, 330, 365],
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Usage Chart
+        const usageCtx = document.getElementById('usageChart').getContext('2d');
+        const usageChart = new Chart(usageCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mar 28', 'Mar 29', 'Mar 30', 'Mar 31', 'Apr 1', 'Apr 2', 'Apr 3'],
+                datasets: [{
+                    label: 'Requests',
+                    data: [1245, 1356, 1298, 1542, 1687, 1745, 1832],
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Performance Chart
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(performanceCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mar 28', 'Mar 29', 'Mar 30', 'Mar 31', 'Apr 1', 'Apr 2', 'Apr 3'],
+                datasets: [{
+                    label: 'Latency (ms)',
+                    data: [135, 142, 128, 145, 132, 124, 118],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

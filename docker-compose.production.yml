@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    image: private-ai-web:latest
+    command: admin
+    restart: unless-stopped
+    ports:
+      - "7070:7070"
+    volumes:
+      - data-volume:/app/data
+      - logs-volume:/app/logs
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+      - BASIC_AUTH_ENABLED=true
+      - WORKERS=4
+      - TIMEOUT=120
+      - MAX_REQUESTS=1000
+    depends_on:
+      - proxy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7070/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    image: private-ai-proxy:latest
+    command: proxy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - data-volume:/app/data
+      - logs-volume:/app/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+      - PROXY_PORT=8080
+      - HEALTH_PORT=8081
+      - LOG_LEVEL=info
+      - ENABLE_HEALTH_CHECK=true
+      - ENABLE_RATE_LIMITING=true
+      - RATE_LIMIT_RPM=60
+      - ENCRYPT_DATABASE=true
+      - MAX_REQUEST_SIZE=10485760
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  data-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data
+  logs-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/logs
+
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

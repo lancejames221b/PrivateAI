@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Security Check - AI Security Proxy{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-shield-alt"></i> Security Status Check
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    This page displays the current security configuration of your AI Security Proxy.
+                </p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Regular security checks are recommended to ensure proper protection of sensitive data.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-lock"></i> Core Security Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <!-- Database Encryption Status -->
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Database Encryption
+                        {% if security.encryption_enabled %}
+                            <span class="badge bg-success rounded-pill"><i class="fas fa-check"></i> Enabled</span>
+                        {% else %}
+                            <span class="badge bg-danger rounded-pill"><i class="fas fa-times"></i> Disabled</span>
+                        {% endif %}
+                    </li>
+                    
+                    <!-- Encryption Key Status -->
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Encryption Key
+                        {% if security.encryption_key_exists %}
+                            <span class="badge bg-success rounded-pill"><i class="fas fa-check"></i> Present</span>
+                        {% else %}
+                            <span class="badge bg-danger rounded-pill"><i class="fas fa-times"></i> Missing</span>
+                        {% endif %}
+                    </li>
+                    
+                    <!-- Basic Auth Status -->
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Web UI Authentication
+                        {% if security.basic_auth_enabled %}
+                            <span class="badge bg-success rounded-pill"><i class="fas fa-check"></i> Enabled</span>
+                        {% else %}
+                            <span class="badge bg-danger rounded-pill"><i class="fas fa-times"></i> Disabled</span>
+                        {% endif %}
+                    </li>
+                    
+                    <!-- HTTPS Status -->
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        HTTPS for Admin UI
+                        {% if security.https %}
+                            <span class="badge bg-success rounded-pill"><i class="fas fa-check"></i> Enabled</span>
+                        {% else %}
+                            <span class="badge bg-warning rounded-pill"><i class="fas fa-exclamation-triangle"></i> Disabled</span>
+                        {% endif %}
+                    </li>
+                </ul>
+                
+                {% if not security.encryption_enabled or not security.basic_auth_enabled %}
+                <div class="alert alert-danger mt-3">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Security Warning!</strong>
+                    <ul class="mb-0 mt-2">
+                        {% if not security.encryption_enabled %}
+                        <li>Database encryption is disabled. Sensitive data is stored in plaintext.</li>
+                        {% endif %}
+                        {% if not security.basic_auth_enabled %}
+                        <li>Web UI authentication is disabled. Anyone with access to this port can access the admin interface.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs"></i> Component Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <!-- Certificate Status -->
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        mitmproxy Certificate
+                        {% if security.cert_installed %}
+                            <span class="badge bg-success rounded-pill"><i class="fas fa-check"></i> Installed</span>
+                        {% else %}
+                            <span class="badge bg-danger rounded-pill"><i class="fas fa-times"></i> Not Installed</span>
+                        {% endif %}
+                    </li>
+                    
+                    <!-- Presidio Status -->
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Microsoft Presidio
+                        {% if security.presidio_available %}
+                            <span class="badge bg-success rounded-pill"><i class="fas fa-check"></i> Available</span>
+                        {% else %}
+                            <span class="badge bg-warning rounded-pill"><i class="fas fa-exclamation-triangle"></i> Not Available</span>
+                        {% endif %}
+                    </li>
+                </ul>
+                
+                {% if not security.cert_installed or not security.presidio_available %}
+                <div class="alert alert-warning mt-3">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Configuration Warning!</strong>
+                    <ul class="mb-0 mt-2">
+                        {% if not security.cert_installed %}
+                        <li>mitmproxy certificate is not installed. The proxy may not be able to intercept HTTPS traffic.</li>
+                        {% endif %}
+                        {% if not security.presidio_available %}
+                        <li>Microsoft Presidio is not available. The proxy will fall back to regex-based detection only.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-check-circle"></i> Security Recommendations
+                </h5>
+            </div>
+            <div class="card-body">
+                <ol class="list-unstyled">
+                    {% if not security.encryption_enabled %}
+                    <li class="mb-2">
+                        <i class="fas fa-arrow-right text-danger"></i> <strong>Enable database encryption</strong> by setting <code>ENCRYPT_DATABASE=true</code> in your <code>.env</code> file
+                    </li>
+                    {% endif %}
+                    
+                    {% if not security.basic_auth_enabled %}
+                    <li class="mb-2">
+                        <i class="fas fa-arrow-right text-danger"></i> <strong>Enable web UI authentication</strong> by setting <code>BASIC_AUTH_ENABLED=true</code> in your <code>.env</code> file
+                    </li>
+                    {% endif %}
+                    
+                    {% if not security.cert_installed %}
+                    <li class="mb-2">
+                        <i class="fas fa-arrow-right text-warning"></i> <strong>Install mitmproxy certificate</strong> from the <a href="{{ url_for('setup') }}">Setup page</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if not security.presidio_available %}
+                    <li class="mb-2">
+                        <i class="fas fa-arrow-right text-warning"></i> <strong>Install Microsoft Presidio requirements</strong> from the <a href="{{ url_for('setup') }}">Setup page</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if not security.https %}
+                    <li class="mb-2">
+                        <i class="fas fa-arrow-right text-warning"></i> <strong>Consider using HTTPS</strong> for the admin UI if it will be accessed remotely
+                    </li>
+                    {% endif %}
+                    
+                    <li class="mb-2">
+                        <i class="fas fa-arrow-right text-info"></i> Regularly review the <a href="{{ url_for('logs') }}">logs</a> for unusual activity
+                    </li>
+                    
+                    <li class="mb-2">
+                        <i class="fas fa-arrow-right text-info"></i> Update your custom patterns regularly for optimal detection
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

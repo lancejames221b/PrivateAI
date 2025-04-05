@@ -1,0 +1,38 @@
+{
+  "plugins": {
+    "CopilotPlugin": {
+      "enabled": true,
+      "priority": 10,
+      "domains": [
+        "api.github.com",
+        "github.com",
+        "api.githubcopilot.com",
+        "copilot-proxy.githubusercontent.com",
+        "githubcopilot.com",
+        "default.exp-tas.com"
+      ]
+    },
+    "AIToolsPrivacyPlugin": {
+      "enabled": true,
+      "priority": 5,
+      "domains": [
+        "api.github.com",
+        "github.com",
+        "api.githubcopilot.com",
+        "copilot-proxy.githubusercontent.com",
+        "githubcopilot.com",
+        "default.exp-tas.com",
+        "api.openai.com",
+        "api.anthropic.com",
+        "codewhisperer.amazonaws.com",
+        "tabnine.com",
+        "api.sourcegraph.com",
+        "api.codeium.com",
+        "api.cursor.sh",
+        "api.replit.com",
+        "api.kite.com",
+        "api.jetbrains.com"
+      ]
+    }
+  }
+}

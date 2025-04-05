@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Patterns - AI Security Proxy{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-plus-circle"></i> Add New Pattern
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {{ form.csrf_token }}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">{{ form.name.label }}</label>
+                        {{ form.name(class="form-control", placeholder="e.g., credit_card_visa") }}
+                        {% if form.name.errors %}
+                        <div class="text-danger">
+                            {% for error in form.name.errors %}
+                            <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="entity_type" class="form-label">{{ form.entity_type.label }}</label>
+                        {{ form.entity_type(class="form-select") }}
+                        <small class="text-muted">Select the type of data this pattern is designed to detect</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="pattern" class="form-label">{{ form.pattern.label }}</label>
+                        {{ form.pattern(class="form-control", rows=5, placeholder="e.g., \\b4[0-9]{12}(?:[0-9]{3})?\\b") }}
+                        {% if form.pattern.errors %}
+                        <div class="text-danger">
+                            {% for error in form.pattern.errors %}
+                            <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">Use valid regex syntax. Remember to escape special characters.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">{{ form.description.label }}</label>
+                        {{ form.description(class="form-control", rows=2, placeholder="Describe what this pattern detects") }}
+                        <small class="text-muted">Optional description of the pattern's purpose</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">{{ form.priority.label }}</label>
+                        {{ form.priority(class="form-select") }}
+                        <small class="text-muted">Higher priority patterns are applied first</small>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        {{ form.is_active(class="form-check-input") }}
+                        <label for="is_active" class="form-check-label">{{ form.is_active.label }}</label>
+                    </div>
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle"></i> Pattern Tips
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Common Regex Patterns</h6>
+                <ul>
+                    <li><strong>Email:</strong> <code>\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b</code></li>
+                    <li><strong>Credit Card:</strong> <code>\b(?:\d{4}[- ]?){3}\d{4}\b</code></li>
+                    <li><strong>SSN:</strong> <code>\b\d{3}-\d{2}-\d{4}\b</code></li>
+                    <li><strong>API Key:</strong> <code>(?i)(api[-_]?key|token)[\s]*[:=][\s]*["\']?([a-zA-Z0-9]{16,64})["\']?</code></li>
+                </ul>
+                <p><a href="https://regex101.com/" target="_blank">Test your regex pattern</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list"></i> Current Patterns
+                </h5>
+                <div>
+                    <a href="{{ url_for('domains') }}" class="btn btn-sm btn-light">
+                        <i class="fas fa-globe"></i> Domain Management
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="patternTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">All Patterns</button>
+                    </li>
+                    {% for entity_type, patterns_by_type in grouped_patterns.items() %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="{{ entity_type|lower }}-tab" data-bs-toggle="tab" data-bs-target="#{{ entity_type|lower }}" type="button" role="tab">
+                            {{ entity_type|replace("_", " ")|title }}
+                            <span class="badge bg-secondary">{{ patterns_by_type|length }}</span>
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                <div class="tab-content p-3 border border-top-0" id="patternTabsContent">
+                    <!-- All Patterns Tab -->
+                    <div class="tab-pane fade show active" id="all" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Pattern</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for name, pattern in patterns.items() %}
+                                    <tr>
+                                        <td>{{ name }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                {{ pattern.entity_type|default('GENERIC')|replace("_", " ")|title }}
+                                            </span>
+                                        </td>
+                                        <td><code>{{ pattern.pattern }}</code></td>
+                                        <td>
+                                            {% if pattern.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ url_for('toggle_pattern', name=name) }}" class="btn btn-sm btn-outline-primary">
+                                                    {% if pattern.is_active %}
+                                                    <i class="fas fa-pause"></i>
+                                                    {% else %}
+                                                    <i class="fas fa-play"></i>
+                                                    {% endif %}
+                                                </a>
+                                                <a href="{{ url_for('delete_pattern', name=name) }}" class="btn btn-sm btn-outline-danger"
+                                                   onclick="return confirm('Are you sure you want to delete this pattern?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No custom patterns defined yet</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabs for each entity type -->
+                    {% for entity_type, patterns_by_type in grouped_patterns.items() %}
+                    <div class="tab-pane fade" id="{{ entity_type|lower }}" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Pattern</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for name, pattern in patterns_by_type.items() %}
+                                    <tr>
+                                        <td>{{ name }}</td>
+                                        <td><code>{{ pattern.pattern }}</code></td>
+                                        <td>{{ pattern.description or 'No description' }}</td>
+                                        <td>
+                                            {% if pattern.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ url_for('toggle_pattern', name=name) }}" class="btn btn-sm btn-outline-primary">
+                                                    {% if pattern.is_active %}
+                                                    <i class="fas fa-pause"></i>
+                                                    {% else %}
+                                                    <i class="fas fa-play"></i>
+                                                    {% endif %}
+                                                </a>
+                                                <a href="{{ url_for('delete_pattern', name=name) }}" class="btn btn-sm btn-outline-danger"
+                                                   onclick="return confirm('Are you sure you want to delete this pattern?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No {{ entity_type|replace("_", " ")|title }} patterns defined</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <h6><i class="fas fa-info-circle"></i> About Patterns</h6>
+                    <p>Custom patterns are added to the built-in patterns. They are applied using regex matching to detect sensitive data.</p>
+                    <p>Pattern changes take effect immediately without restarting the proxy.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // If URL has type parameter, activate that tab
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type');
+        
+        if (type) {
+            // Set entity type dropdown
+            const typeSelect = document.getElementById('entity_type');
+            if (typeSelect) {
+                for (let i = 0; i < typeSelect.options.length; i++) {
+                    if (typeSelect.options[i].value === type) {
+                        typeSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            
+            // Activate tab if it exists
+            const tabId = type.toLowerCase() + '-tab';
+            const tab = document.getElementById(tabId);
+            if (tab) {
+                const tabInstance = new bootstrap.Tab(tab);
+                tabInstance.show();
+            }
+        }
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,464 @@
+{% extends 'base.html' %}
+
+{% block title %}Configuration Interface - AI Security Proxy{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-cogs"></i> Configuration Interface</h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">Manage privacy rules, model connections, and token filtering settings.</p>
+                
+                <ul class="nav nav-tabs" id="configTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="privacy-rules-tab" data-bs-toggle="tab" data-bs-target="#privacy-rules" type="button" role="tab" aria-controls="privacy-rules" aria-selected="true">
+                            <i class="fas fa-shield-alt"></i> Privacy Rules
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="model-connections-tab" data-bs-toggle="tab" data-bs-target="#model-connections" type="button" role="tab" aria-controls="model-connections" aria-selected="false">
+                            <i class="fas fa-plug"></i> Model Connections
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="token-filtering-tab" data-bs-toggle="tab" data-bs-target="#token-filtering" type="button" role="tab" aria-controls="token-filtering" aria-selected="false">
+                            <i class="fas fa-filter"></i> Token Filtering
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content" id="configTabsContent">
+    <!-- Privacy Rules Tab -->
+    <div class="tab-pane fade show active" id="privacy-rules" role="tabpanel" aria-labelledby="privacy-rules-tab">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Add New Rule</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="new-rule-form">
+                            <div class="mb-3">
+                                <label for="rule-name" class="form-label">Rule Name</label>
+                                <input type="text" class="form-control" id="rule-name" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="rule-type" class="form-label">Rule Type</label>
+                                <select class="form-select" id="rule-type" required>
+                                    <option value="">Select a type</option>
+                                    <option value="PII">Personal Identifiable Information</option>
+                                    <option value="CODE">Code Snippets</option>
+                                    <option value="CREDENTIAL">Credentials</option>
+                                    <option value="DOMAIN">Domain Names</option>
+                                    <option value="IP_ADDRESS">IP Addresses</option>
+                                    <option value="INTERNAL_PROJECT_NAME">Internal Project Names</option>
+                                    <option value="CUSTOM">Custom Entity</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="rule-pattern" class="form-label">Pattern (Regex)</label>
+                                <textarea class="form-control" id="rule-pattern" rows="3" required></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="rule-priority" class="form-label">Priority</label>
+                                <select class="form-select" id="rule-priority">
+                                    <option value="1">High - Apply first</option>
+                                    <option value="2" selected>Medium - Normal processing</option>
+                                    <option value="3">Low - Apply last</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="rule-active" checked>
+                                    <label class="form-check-label" for="rule-active">Active</label>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Add Rule</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-list"></i> Existing Rules</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Pattern</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Email Detection</td>
+                                        <td><span class="badge bg-info">PII</span></td>
+                                        <td><code>[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}</code></td>
+                                        <td>High</td>
+                                        <td><span class="badge bg-success">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>API Key Detection</td>
+                                        <td><span class="badge bg-warning">CREDENTIAL</span></td>
+                                        <td><code>[A-Za-z0-9_]{32,}</code></td>
+                                        <td>High</td>
+                                        <td><span class="badge bg-success">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Internal Project Names</td>
+                                        <td><span class="badge bg-secondary">INTERNAL_PROJECT_NAME</span></td>
+                                        <td><code>(Project|PROJ)-[A-Z]{3,5}</code></td>
+                                        <td>Medium</td>
+                                        <td><span class="badge bg-success">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>AWS Access Keys</td>
+                                        <td><span class="badge bg-warning">CREDENTIAL</span></td>
+                                        <td><code>AKIA[0-9A-Z]{16}</code></td>
+                                        <td>High</td>
+                                        <td><span class="badge bg-success">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Internal IP Ranges</td>
+                                        <td><span class="badge bg-info">IP_ADDRESS</span></td>
+                                        <td><code>10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}</code></td>
+                                        <td>Medium</td>
+                                        <td><span class="badge bg-secondary">Inactive</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Model Connections Tab -->
+    <div class="tab-pane fade" id="model-connections" role="tabpanel" aria-labelledby="model-connections-tab">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Add Model Connection</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="new-model-form">
+                            <div class="mb-3">
+                                <label for="model-provider" class="form-label">AI Provider</label>
+                                <select class="form-select" id="model-provider" required>
+                                    <option value="">Select a provider</option>
+                                    <option value="openai">OpenAI</option>
+                                    <option value="anthropic">Anthropic</option>
+                                    <option value="google">Google AI</option>
+                                    <option value="mistral">Mistral AI</option>
+                                    <option value="openrouter">OpenRouter</option>
+                                    <option value="custom">Custom Provider</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="model-name" class="form-label">Model Name</label>
+                                <input type="text" class="form-control" id="model-name" placeholder="e.g., gpt-4o, claude-3-opus" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="api-key" class="form-label">API Key</label>
+                                <input type="password" class="form-control" id="api-key" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="api-endpoint" class="form-label">API Endpoint</label>
+                                <input type="url" class="form-control" id="api-endpoint" placeholder="https://api.example.com/v1">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="model-active" checked>
+                                    <label class="form-check-label" for="model-active">Active</label>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Add Model</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-list"></i> Connected Models</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">OpenAI - GPT-4o</h5>
+                                    <span class="badge bg-success">Active</span>
+                                </div>
+                                <p class="mb-1">Endpoint: https://api.openai.com/v1</p>
+                                <small class="text-muted">API Key: ••••••••••••••••</small>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i> Edit</button>
+                                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i> Remove</button>
+                                    <button class="btn btn-sm btn-outline-success"><i class="fas fa-check-circle"></i> Test Connection</button>
+                                </div>
+                            </div>
+                            
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Anthropic - Claude 3 Opus</h5>
+                                    <span class="badge bg-success">Active</span>
+                                </div>
+                                <p class="mb-1">Endpoint: https://api.anthropic.com/v1</p>
+                                <small class="text-muted">API Key: ••••••••••••••••</small>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i> Edit</button>
+                                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i> Remove</button>
+                                    <button class="btn btn-sm btn-outline-success"><i class="fas fa-check-circle"></i> Test Connection</button>
+                                </div>
+                            </div>
+                            
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Google AI - Gemini 2.0 Pro</h5>
+                                    <span class="badge bg-secondary">Inactive</span>
+                                </div>
+                                <p class="mb-1">Endpoint: https://generativelanguage.googleapis.com/v1</p>
+                                <small class="text-muted">API Key: ••••••••••••••••</small>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i> Edit</button>
+                                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i> Remove</button>
+                                    <button class="btn btn-sm btn-outline-success"><i class="fas fa-check-circle"></i> Test Connection</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Token Filtering Tab -->
+    <div class="tab-pane fade" id="token-filtering" role="tabpanel" aria-labelledby="token-filtering-tab">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-filter"></i> Token Filtering Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="token-filtering-form">
+                            <div class="mb-3">
+                                <label for="token-threshold" class="form-label">Sensitivity Threshold</label>
+                                <input type="range" class="form-range" min="0" max="100" value="75" id="token-threshold">
+                                <div class="d-flex justify-content-between">
+                                    <span>Low (More Permissive)</span>
+                                    <span id="threshold-value">75%</span>
+                                    <span>High (More Restrictive)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="token-replacement" class="form-label">Token Replacement Strategy</label>
+                                <select class="form-select" id="token-replacement">
+                                    <option value="uuid">UUID Replacement (e.g., __EMAIL_abc123__)</option>
+                                    <option value="generic">Generic Replacement (e.g., [EMAIL])</option>
+                                    <option value="redact">Complete Redaction (e.g., ********)</option>
+                                    <option value="custom">Custom Replacement</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="custom-prefix" class="form-label">Custom Prefix</label>
+                                <input type="text" class="form-control" id="custom-prefix" placeholder="e.g., __REDACTED_" disabled>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="consistent-replacement" checked>
+                                    <label class="form-check-label" for="consistent-replacement">Use consistent replacements</label>
+                                </div>
+                                <small class="text-muted">When enabled, the same sensitive data will always be replaced with the same token.</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="restore-responses" checked>
+                                    <label class="form-check-label" for="restore-responses">Restore original values in responses</label>
+                                </div>
+                                <small class="text-muted">When enabled, replacement tokens in model responses will be converted back to original values.</small>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Token Filtering Test</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="test-input" class="form-label">Test Input</label>
+                            <textarea class="form-control" id="test-input" rows="5" placeholder="Enter text with sensitive information to test filtering..."></textarea>
+                        </div>
+                        
+                        <button id="run-test" class="btn btn-warning mb-3">Run Test</button>
+                        
+                        <div class="mb-3">
+                            <label for="test-output" class="form-label">Filtered Output</label>
+                            <textarea class="form-control" id="test-output" rows="5" readonly></textarea>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle"></i> Detected Entities</h6>
+                            <div id="detected-entities">
+                                <p class="text-muted">Run a test to see detected entities</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card shadow">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Token Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h3 id="total-filtered">12,458</h3>
+                                        <p class="mb-0">Total Filtered Tokens</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h3 id="filter-rate">4.2%</h3>
+                                        <p class="mb-0">Filter Rate</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configuration interface functionality would go here
+        console.log('Configuration interface loaded');
+        
+        // Token threshold slider
+        const thresholdSlider = document.getElementById('token-threshold');
+        const thresholdValue = document.getElementById('threshold-value');
+        
+        thresholdSlider.addEventListener('input', function() {
+            thresholdValue.textContent = this.value + '%';
+        });
+        
+        // Token replacement strategy
+        const replacementSelect = document.getElementById('token-replacement');
+        const customPrefix = document.getElementById('custom-prefix');
+        
+        replacementSelect.addEventListener('change', function() {
+            customPrefix.disabled = this.value !== 'custom';
+        });
+        
+        // Token filtering test
+        document.getElementById('run-test').addEventListener('click', function() {
+            const testInput = document.getElementById('test-input').value;
+            const testOutput = document.getElementById('test-output');
+            const detectedEntities = document.getElementById('detected-entities');
+            
+            if (!testInput) {
+                alert('Please enter some text to test');
+                return;
+            }
+            
+            // Simulate filtering (in a real implementation, this would call the API)
+            const filtered = testInput
+                .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '__EMAIL_abc123__')
+                .replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, '__IP_def456__')
+                .replace(/\b[A-Za-z0-9_]{32,}\b/g, '__API_KEY_ghi789__');
+            
+            testOutput.value = filtered;
+            
+            // Show detected entities
+            detectedEntities.innerHTML = `
+                <div class="badge bg-info me-2 mb-2">EMAIL (1)</div>
+                <div class="badge bg-info me-2 mb-2">IP_ADDRESS (2)</div>
+                <div class="badge bg-warning me-2 mb-2">API_KEY (1)</div>
+            `;
+        });
+        
+        // Form submissions
+        document.getElementById('new-rule-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('New privacy rule added successfully');
+        });
+        
+        document.getElementById('new-model-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('New model connection added successfully');
+        });
+        
+        document.getElementById('token-filtering-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Token filtering settings saved successfully');
+        });
+    });
+</script>
+{% endblock %}

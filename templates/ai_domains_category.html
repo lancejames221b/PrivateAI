@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}AI Domains - {{ current_category|title }} Category{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/domain_management.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-4">AI Domains: {{ current_category|title }}</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Domains in {{ current_category|title }} Category</h5>
+                        <a href="{{ url_for('ai_domains') }}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Back to All Categories
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if domains_data.categories.get(current_category, [])|length > 0 %}
+                        <div id="domainsList" class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Domain</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for domain in domains_data.categories.get(current_category, []) %}
+                                        <tr>
+                                            <td>{{ domain }}</td>
+                                            <td>
+                                                <form action="{{ url_for('delete_ai_domain', domain=domain) }}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No domains found in this category.
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">
+                        {{ current_category|title }} category contains {{ domains_data.categories.get(current_category, [])|length }} domain(s).
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Add Domain Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Add New Domain to {{ current_category|title }}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ url_for('add_ai_domain') }}">
+                        {{ form.csrf_token }}
+                        
+                        <div class="mb-3">
+                            <label for="domain" class="form-label">Domain</label>
+                            {{ form.domain(class="form-control", placeholder="api.example.com") }}
+                            <small class="form-text text-muted">Enter domain without protocol (e.g., api.example.com)</small>
+                            {% if form.domain.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.domain.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            {{ form.category(class="form-control") }}
+                            <small class="form-text text-muted">Pre-selected to {{ current_category|title }}</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description (Optional)</label>
+                            {{ form.description(class="form-control", placeholder="Brief description of this domain") }}
+                            <small class="form-text text-muted">Optional notes about this domain</small>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary", id="addDomainBtn") }}
+                            <button type="button" id="saveDomainBtn" class="btn btn-success">
+                                <i class="fas fa-save"></i> Save Domain Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Category Reference -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">About {{ current_category|title }} Providers</h5>
+                </div>
+                <div class="card-body">
+                    {% if current_category == 'openai' %}
+                        <p>OpenAI provides models like GPT-3.5, GPT-4, and DALL-E.</p>
+                        <p>Common domains include api.openai.com and various Azure OpenAI endpoints.</p>
+                    {% elif current_category == 'anthropic' %}
+                        <p>Anthropic offers Claude models with strong safety features.</p>
+                        <p>API endpoints typically use api.anthropic.com and related domains.</p>
+                    {% elif current_category == 'google' %}
+                        <p>Google AI includes Gemini, PaLM, and other large language models.</p>
+                        <p>Domains include api.gemini.google.com and various Google Cloud endpoints.</p>
+                    {% elif current_category == 'ide' %}
+                        <p>IDE integrations connect code editors and development environments to AI services.</p>
+                        <p>This includes GitHub Copilot, Cursor AI, VS Code AI, and similar tools.</p>
+                    {% elif current_category == 'openrouter' %}
+                        <p>OpenRouter provides a unified API to access multiple AI models.</p>
+                        <p>It routes requests to various providers while maintaining a consistent interface.</p>
+                    {% elif current_category == 'open' %}
+                        <p>Open source model providers include Hugging Face and other open platforms.</p>
+                        <p>These services host and serve open source AI models.</p>
+                    {% elif current_category == 'emerging' %}
+                        <p>Emerging providers include newer AI companies with specialized models.</p>
+                        <p>This category includes Mistral AI, Together AI, Perplexity, and other growing platforms.</p>
+                    {% else %}
+                        <p>This category contains specialized or custom AI providers.</p>
+                    {% endif %}
+                    <p class="mb-0">
+                        <strong>Privacy Tip:</strong> Each provider may have unique data formats that Private AI automatically detects and adapts.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

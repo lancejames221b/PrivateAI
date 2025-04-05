@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Setup - AI Security Proxy{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tools"></i> Setup & Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Set up and configure AI Security Proxy to protect your AI communications.
+                </p>
+                <p>
+                    Follow the steps below to complete your setup and start using the proxy.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-shield-alt"></i> Certificate Setup
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    The certificate must be installed to allow the proxy to inspect HTTPS traffic.
+                </p>
+                
+                <div class="alert {{ 'alert-success' if cert_installed else 'alert-warning' }}">
+                    <strong>Certificate Status:</strong> 
+                    {% if cert_installed %}
+                    Installed
+                    <i class="fas fa-check-circle text-success ms-2"></i>
+                    {% else %}
+                    Not Installed
+                    <i class="fas fa-exclamation-circle text-warning ms-2"></i>
+                    {% endif %}
+                </div>
+                
+                {% if not cert_installed %}
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{{ url_for('install_cert') }}" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Install Certificate
+                    </a>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">This will install the mitmproxy certificate. You may need to enter your password.</small>
+                </div>
+                {% endif %}
+                
+                <div class="mt-4">
+                    <h6>Manual Certificate Installation</h6>
+                    <p>If automatic installation fails, follow these steps:</p>
+                    <ol>
+                        <li>Find the certificate at <code>~/.mitmproxy/mitmproxy-ca-cert.pem</code></li>
+                        <li>Import it into your system's certificate store</li>
+                        <li>For browsers, import it into browser settings</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-network-wired"></i> Network Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    Configure your network settings to use the proxy:
+                </p>
+                
+                <div class="alert alert-info">
+                    <strong>Proxy Address:</strong> 127.0.0.1<br>
+                    <strong>Proxy Port:</strong> 8080
+                </div>
+                
+                <h6>Configuration by OS:</h6>
+                <div class="accordion" id="proxySetupAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#macosSetup">
+                                <i class="fab fa-apple me-2"></i> macOS
+                            </button>
+                        </h2>
+                        <div id="macosSetup" class="accordion-collapse collapse" data-bs-parent="#proxySetupAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Open System Preferences</li>
+                                    <li>Click on Network</li>
+                                    <li>Select your active connection</li>
+                                    <li>Click Advanced</li>
+                                    <li>Go to Proxies tab</li>
+                                    <li>Enable Web Proxy (HTTP) and Secure Web Proxy (HTTPS)</li>
+                                    <li>Enter 127.0.0.1 for the server and 8080 for the port</li>
+                                    <li>Click OK, then Apply</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#windowsSetup">
+                                <i class="fab fa-windows me-2"></i> Windows
+                            </button>
+                        </h2>
+                        <div id="windowsSetup" class="accordion-collapse collapse" data-bs-parent="#proxySetupAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Open Settings</li>
+                                    <li>Go to Network & Internet</li>
+                                    <li>Click on Proxy</li>
+                                    <li>Enable Manual proxy setup</li>
+                                    <li>Enter 127.0.0.1 for Address and 8080 for Port</li>
+                                    <li>Click Save</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#linuxSetup">
+                                <i class="fab fa-linux me-2"></i> Linux
+                            </button>
+                        </h2>
+                        <div id="linuxSetup" class="accordion-collapse collapse" data-bs-parent="#proxySetupAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Open Settings or System Settings</li>
+                                    <li>Go to Network</li>
+                                    <li>Click on Network Proxy</li>
+                                    <li>Select Manual</li>
+                                    <li>Enter 127.0.0.1 for the HTTP and HTTPS proxy fields and 8080 for the port</li>
+                                    <li>Apply the settings</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-brain"></i> Microsoft Presidio Setup
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    Microsoft Presidio provides enhanced PII detection and anonymization capabilities. 
+                    It requires language models for optimal performance.
+                </p>
+                
+                <div class="alert {{ 'alert-success' if presidio_status else 'alert-warning' }}">
+                    <strong>Presidio Status:</strong> 
+                    {% if presidio_status %}
+                    Initialized
+                    <i class="fas fa-check-circle text-success ms-2"></i>
+                    {% else %}
+                    Not Initialized
+                    <i class="fas fa-exclamation-circle text-warning ms-2"></i>
+                    {% endif %}
+                </div>
+                
+                {% if not presidio_status %}
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{{ url_for('setup_presidio') }}" class="btn btn-success">
+                        <i class="fas fa-download"></i> Initialize Presidio
+                    </a>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">This will download a ~500MB language model needed for Presidio to function optimally.</small>
+                </div>
+                {% endif %}
+                
+                <div class="mt-4">
+                    <h6>What is Microsoft Presidio?</h6>
+                    <p>
+                        Presidio is an open-source framework for contextual PII detection and anonymization. It provides:
+                    </p>
+                    <ul>
+                        <li>Advanced entity recognition beyond regex patterns</li>
+                        <li>Context-aware PII detection</li>
+                        <li>Support for multiple languages</li>
+                        <li>Enhanced protection against AI model inference</li>
+                    </ul>
+                    <p>
+                        <a href="https://microsoft.github.io/presidio/" target="_blank">Learn more about Presidio</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cog"></i> Advanced Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    Fine-tune your AI Security Proxy:
+                </p>
+                
+                <div class="list-group">
+                    <a href="{{ url_for('domains') }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1"><i class="fas fa-globe"></i> Domain Management</h6>
+                            <small><i class="fas fa-chevron-right"></i></small>
+                        </div>
+                        <p class="mb-1 small">Configure domain detection and blocklists</p>
+                    </a>
+                    <a href="{{ url_for('patterns') }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1"><i class="fas fa-cogs"></i> Pattern Configuration</h6>
+                            <small><i class="fas fa-chevron-right"></i></small>
+                        </div>
+                        <p class="mb-1 small">Create custom detection patterns</p>
+                    </a>
+                    <a href="{{ url_for('patterns') }}?type=INTERNAL_PROJECT_NAME" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1"><i class="fas fa-eye-slash"></i> AI Inference Protection</h6>
+                            <small><i class="fas fa-chevron-right"></i></small>
+                        </div>
+                        <p class="mb-1 small">Configure patterns to prevent AI models from inferring private information</p>
+                    </a>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <h6><i class="fas fa-info-circle"></i> Using Environment Variables</h6>
+                    <p class="small mb-0">
+                        Advanced configuration can be set using environment variables. 
+                        See the <code>.env.example</code> file for available options.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

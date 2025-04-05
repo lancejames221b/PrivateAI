@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Authentication - AI Security Proxy{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-lock"></i> Authentication</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('authenticate') }}">
+                    {{ form.csrf_token }}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card shadow mt-4">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-users"></i> Role-based Access Control</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Role</th>
+                                <th>Permissions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Administrator</td>
+                                <td>Full access to all features</td>
+                            </tr>
+                            <tr>
+                                <td>Operator</td>
+                                <td>Can view dashboards and manage privacy rules</td>
+                            </tr>
+                            <tr>
+                                <td>Viewer</td>
+                                <td>Read-only access to dashboards and logs</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow mt-4">
+            <div class="card-header bg-secondary text-white">
+                <h4 class="mb-0"><i class="fas fa-clock"></i> Session Management</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="session_timeout" class="form-label">Session Timeout (minutes)</label>
+                    <input type="number" class="form-control" id="session_timeout" name="session_timeout" value="30" min="5" max="120">
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="auto_logout" checked>
+                    <label class="form-check-label" for="auto_logout">Auto-logout on inactivity</label>
+                </div>
+                <button class="btn btn-secondary">Save Session Settings</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Session management functionality would go here
+        console.log('Authentication page loaded');
+    });
+</script>
+{% endblock %}

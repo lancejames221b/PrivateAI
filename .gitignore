@@ -1,0 +1,63 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+ENV/
+privacy_proxy_env/
+
+# Testing
+.pytest_cache/
+.coverage
+coverage.xml
+
+# Logs and data
+logs/
+proxy_logs/
+*.log
+data/
+
+# Certificates
+*.pem
+*.crt
+*.key
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Backup files
+old_scripts_backup/
+*.bak
+*~
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# Docker
+.dockerignore
+
+# Specific project files
+transformer_diagnostics.json
+fetchfailure.txt
+
+# API keys and sensitive information
+keys.txt
