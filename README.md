@@ -14,13 +14,13 @@ A privacy protection plugin for AI-powered development tools that intercepts and
 
 ```bash
 # Launch VS Code with Private AI protection
-./private_ai.sh launch
+./src/scripts/private_ai.sh launch
 
 # Analyze captured AI tool traffic
-./private_ai.sh analyze
+./src/scripts/private_ai.sh analyze
 
 # Create test files with known PII
-./private_ai.sh test
+./src/scripts/private_ai.sh test
 ```
 
 ## 🔍 Why This Matters
@@ -54,8 +54,8 @@ Private AI provides privacy protection by intercepting the traffic between your 
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/lancejames221b/privateAI.git
-   cd privateAI
+   git clone https://github.com/lancejames221b/PrivateAI.git
+   cd PrivateAI
    ```
 
 2. Install dependencies:
@@ -65,35 +65,34 @@ Private AI provides privacy protection by intercepting the traffic between your 
 
 3. Make scripts executable:
    ```bash
-   chmod +x private_ai.sh
-   chmod +x plugins/ai_tools_privacy/scripts/*.sh
+   chmod +x src/scripts/private_ai.sh
+   chmod +x src/scripts/setup_certificates.sh
    ```
 
 ## 📚 Project Structure
 
 ```
 .
-├── private_ai.sh              # Main script for easy access
-├── proxy_base.py              # Base proxy module
-├── plugins/
-│   ├── config.json            # Plugin configuration
-│   ├── ai_tools_plugin.py     # Base AI tools plugin
-│   └── ai_tools_privacy/      # AI tools privacy plugin
-│       ├── __init__.py
-│       ├── ai_tools_privacy_plugin.py
-│       ├── scripts/
-│       │   ├── launch_ide_with_privacy.sh
-│       │   ├── analyze_privacy.sh
-│       │   └── test_privacy.sh
-│       └── docs/
-│           └── README.md
-├── requirements.txt           # Python dependencies
-└── README.md                  # This file
+├── main.py                  # Main entry point
+├── setup.py                 # Package setup script
+├── README.md                # This file
+├── LICENSE                  # MIT License
+├── requirements.txt         # Python dependencies
+└── src/                     # Source code
+    ├── core/                # Core functionality
+    ├── proxy/               # Proxy implementation
+    ├── privacy/             # Privacy protection
+    ├── utils/               # Utility functions
+    ├── plugins/             # Plugin system
+    ├── scripts/             # Shell scripts
+    ├── tests/               # Test suite
+    ├── examples/            # Example code
+    └── web/                 # Web interface
 ```
 
 ## 🔧 Configuration
 
-The plugin can be configured by editing the `plugins/config.json` file:
+The plugin can be configured by editing the `src/plugins/config.json` file:
 
 ```json
 {
